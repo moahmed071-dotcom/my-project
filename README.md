@@ -8,7 +8,7 @@ A personal creative productivity platform for a Senior Graphic Designer / Art Di
 - **Creative Brief Generator** — form → structured 10-section brief including the creative concept (copy, per-section copy, export)
 - **Campaign Generator** — big idea, concept, 5 taglines, key visual, art direction, 5 social ideas, 3 video concepts, CTA, content pillars
 - **AI Prompt Generator** — prompts for image, video, product, real estate, social and cinematic work, each broken into 11 controls plus a compiled, paste-ready prompt
-- **Claude-powered generation** — the three generators call Claude through a server-side API; the key never reaches the browser
+- **Optional Claude generation** — the three generators can call Claude through a server-side API (off by default); the key never reaches the browser
 - **Projects** — create / edit / delete, status + category filters, sort, grid / list views
 - **Clients** — create / edit / delete, with project counts computed from linked projects
 - **Settings** — profile, creative defaults, AI engine selection, JSON export / import, sample-data reset
@@ -20,17 +20,21 @@ Requires Node.js 20.12 or newer (22 recommended).
 
 ```bash
 npm install
-cp .env.example .env     # then paste your Anthropic API key into .env
 npm run dev              # app on http://localhost:5173, API server on :8787
 ```
 
+The app works out of the box with the **Local Creative Engine** (the default): no API key, no cost. Connecting Claude is optional; see AI setup below.
+
 `npm run dev` starts two processes: the Vite frontend and the API server (`server/`). Vite forwards every `/api` request to the API server, so the browser only ever talks to the app's own backend.
 
-### AI setup (Claude)
+### AI setup (Claude, optional)
+
+Only needed if you want real AI generation. It uses paid Anthropic API credit.
 
 1. Create an API key in the [Anthropic Console](https://console.anthropic.com/settings/keys).
 2. Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY=...`.
 3. Restart `npm run dev`. **Settings → AI engine** should now show **Connected**.
+4. In the same section, select **Claude (Anthropic)** as the engine.
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
@@ -39,7 +43,7 @@ npm run dev              # app on http://localhost:5173, API server on :8787
 | `ANTHROPIC_EFFORT` | no | `high` | Reasoning effort: `low`, `medium`, `high`, `xhigh` or `max`. Lower is faster and cheaper. |
 | `PORT` | no | `8787` | API server port. |
 
-If the key is missing, the app still runs. The header and Settings show **Not configured**, and the generators show a clear message with a retry button and a link to Settings.
+If Claude is selected but no key is set, the header and Settings show **Not configured**, and the generators show a clear message with a retry button and a link to Settings. Switch back to the Local Creative Engine to keep working without a key.
 
 **Keeping the key safe:**
 - `.env` is git-ignored. Never commit a real key, and never put it in a `VITE_` variable: those are bundled into browser code.
@@ -92,7 +96,7 @@ tests/            e2e suite and the fake Anthropic API
 
 ### How generation works
 
-1. A generator page calls the active `AIProvider` (`src/services/ai`). The default is **Claude**, which `POST`s `{ input }` to `/api/generate/brief`, `/campaign` or `/prompts`.
+1. A generator page calls the active `AIProvider` (`src/services/ai`). The default is the **Local Creative Engine**, which runs in the browser. When **Claude** is selected, the provider `POST`s `{ input }` to `/api/generate/brief`, `/campaign` or `/prompts`.
 2. The server validates the input with Zod, then calls Claude through the official Anthropic SDK (`client.beta.messages.parse`) with:
    - a stable Creative Director system prompt (prompt-cached), covering Egyptian and GCC real estate, buyer psychology, differentiation and Arabic / English / bilingual output;
    - **structured outputs** (a JSON schema), so responses always match the app's data shapes;
@@ -103,4 +107,4 @@ tests/            e2e suite and the fake Anthropic API
 
 **Output language:** each generator has a language option (Match my input / English / Arabic / Bilingual). Arabic text renders right to left automatically. In the Prompt Generator the eleven fields follow the chosen language, while the paste-ready prompt stays in English, which image and video models handle best.
 
-**Other engines** (Settings → AI engine): the **Local Creative Engine** is the original offline, template-based demo engine and needs no key. **Remote AI Endpoint** posts `{ task, model, input }` to a URL you control and expects the same JSON shapes back.
+**Other engines** (Settings → AI engine): the **Local Creative Engine** is the default: offline, template-based, no key. **Remote AI Endpoint** posts `{ task, model, input }` to a URL you control and expects the same JSON shapes back.

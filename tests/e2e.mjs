@@ -92,8 +92,21 @@ try {
   await page.goto(B);
   await page.waitForSelector('text=Quick tools');
   ok(/Mohamed/.test(await page.locator('h1').first().textContent()), 'Dashboard renders');
+  // Default engine is the Local Creative Engine: works with no key and no backend calls.
+  await page.waitForSelector('header >> text=Local engine');
+  ok(true, 'Default engine: header shows Local engine');
+  await page.goto(`${B}/brief`);
+  await page.getByRole('button', { name: 'Use example' }).click();
+  await page.getByRole('button', { name: 'Generate brief' }).click();
+  await page.waitForSelector('text=Copy brief', { timeout: 15000 });
+  ok(fake.requests.length === 0 && (await page.locator('article h3', { hasText: /^\d+Success Criteria$/ }).count()) === 1, 'Default local engine generates a brief without the backend');
+
+  // Switch to Claude for the backend tests.
+  await page.goto(`${B}/settings`);
+  await page.getByRole('button', { name: /Claude \(Anthropic\)/ }).click();
   await page.waitForSelector('header >> text=Claude · Connected');
-  ok(true, 'Header shows Claude · Connected');
+  ok(true, 'Header shows Claude · Connected after selecting Claude');
+  await page.goto(B);
 
   for (const [label, url, heading] of [
     ['Projects', '/projects', 'Projects'],
@@ -209,6 +222,8 @@ try {
   // ── UI without a key: clear not-configured state ──────────────────────────
   const np = await (await browser.newContext({ viewport: { width: 1280, height: 860 } })).newPage();
   np.on('pageerror', (e) => errors.push(`pageerror(no key): ${e.message}`));
+  await np.goto(`${noKey.base}/settings`);
+  await np.getByRole('button', { name: /Claude \(Anthropic\)/ }).click();
   await np.goto(`${noKey.base}/brief`);
   await np.waitForSelector('header >> text=Claude · Not configured');
   ok(true, 'Header shows Claude · Not configured');

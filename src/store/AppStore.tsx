@@ -59,13 +59,9 @@ function loadState(): AppState {
   };
 }
 
-/** Phase 2 made Claude the default engine; move workspaces still on the old default over once. */
+/** Fill in settings added since the workspace was saved. The user's engine choice is kept as-is. */
 function migrateSettings(stored: Partial<Settings>): Settings {
-  const merged = { ...DEFAULT_SETTINGS, ...stored };
-  if ((stored.engineVersion ?? 1) < 2) {
-    return { ...merged, aiProvider: stored.aiProvider === 'remote' ? 'remote' : 'claude', engineVersion: 2 };
-  }
-  return merged;
+  return { ...DEFAULT_SETTINGS, ...stored, engineVersion: DEFAULT_SETTINGS.engineVersion };
 }
 
 function reducer(state: AppState, action: Action): AppState {

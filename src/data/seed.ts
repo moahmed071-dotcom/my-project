@@ -11,7 +11,7 @@ export const DEFAULT_SETTINGS: Settings = {
   studio: 'Independent Studio',
   defaultMarket: 'UAE',
   defaultAspectRatio: 'Auto',
-  aiProvider: 'claude',
+  aiProvider: 'local',
   remoteEndpoint: '',
   remoteModel: 'claude-sonnet-5-5',
   simulateLatency: true,

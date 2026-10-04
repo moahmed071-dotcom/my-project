@@ -30,8 +30,8 @@ function Section({ id, icon: Icon, title, description, children }: { id?: string
 }
 
 const PROVIDERS: { id: AIProviderId; title: string; description: string; badge: string }[] = [
-  { id: 'claude', title: 'Claude (Anthropic)', description: 'Real AI generation through this app’s server. The API key stays on the server.', badge: 'Recommended' },
-  { id: 'local', title: 'Local Creative Engine', description: 'Offline demo: template-based output generated in your browser. No API key needed.', badge: 'Fallback' },
+  { id: 'claude', title: 'Claude (Anthropic)', description: 'Real AI generation through this app’s server. Requires an Anthropic API key on the server.', badge: 'Optional · paid API' },
+  { id: 'local', title: 'Local Creative Engine', description: 'Template-based output generated in your browser. No API key, no cost.', badge: 'Default' },
   { id: 'remote', title: 'Remote AI Endpoint', description: 'Send requests to another backend you run yourself.', badge: 'Advanced' },
 ];
 
@@ -144,7 +144,7 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        <Section id="ai-engine" icon={Cpu} title="AI engine" description="Claude powers the Creative Brief, Campaign and Prompt generators through this app’s own server.">
+        <Section id="ai-engine" icon={Cpu} title="AI engine" description="Choose what powers the Creative Brief, Campaign and Prompt generators. The Local Creative Engine is the default and needs no API key.">
           <AIStatusCard />
           <div className="grid gap-3 sm:grid-cols-3">
             {PROVIDERS.map((p) => (
