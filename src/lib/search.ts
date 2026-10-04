@@ -1,7 +1,7 @@
 import type { AppState } from '@/store/AppStore';
 import { NAV_ITEMS } from './navigation';
 
-export type SearchKind = 'Page' | 'Project' | 'Client' | 'Brief' | 'Campaign' | 'Prompt';
+export type SearchKind = 'Page' | 'Project' | 'Client' | 'Brief' | 'Campaign' | 'Prompt' | 'Design';
 
 export interface SearchResult {
   kind: SearchKind;
@@ -44,6 +44,10 @@ export function search(state: AppState, query: string): SearchResult[] {
   for (const c of state.campaigns) {
     if (matches(q, c.input.brand, c.input.product, c.input.occasion, c.output.bigIdea, c.output.taglines.join(' ')))
       out.push({ kind: 'Campaign', id: c.id, title: `${c.input.brand} — ${c.output.bigIdea}`, subtitle: `Campaign · ${c.input.product}`, to: `/campaign?id=${c.id}` });
+  }
+  for (const d of state.designs) {
+    if (matches(q, d.name, d.campaign, d.content.headline, d.content.brief, clientName(d.clientId)))
+      out.push({ kind: 'Design', id: d.id, title: d.name, subtitle: `Design · ${d.width} × ${d.height}`, to: `/studio/${d.id}` });
   }
   for (const s of state.promptSets) {
     if (matches(q, s.input.idea, s.input.style))

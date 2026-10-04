@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, FileText, FolderKanban, LayoutGrid, Megaphone, Search, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, FileText, FolderKanban, LayoutGrid, Megaphone, PenTool, Search, Sparkles, Users } from 'lucide-react';
 import { useStore } from '@/store/AppStore';
 import { search, type SearchKind } from '@/lib/search';
 import { cn } from '@/lib/cn';
@@ -12,6 +12,7 @@ export const KIND_ICONS: Record<SearchKind, typeof Search> = {
   Brief: FileText,
   Campaign: Megaphone,
   Prompt: Sparkles,
+  Design: PenTool,
 };
 
 export function GlobalSearch() {

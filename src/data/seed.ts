@@ -1,4 +1,5 @@
 import type { Brief, Campaign, Client, Project, PromptSet, Settings } from '@/types';
+import type { BrandKit } from '@/features/studio/model/types';
 import { buildBrief } from '@/services/ai/engines/briefEngine';
 import { buildCampaign } from '@/services/ai/engines/campaignEngine';
 import { buildPrompts } from '@/services/ai/engines/promptEngine';
@@ -109,4 +110,51 @@ export function seedPromptSets(): PromptSet[] {
     types: ['image', 'realEstate', 'cinematic'] as PromptSet['input']['types'],
   };
   return [{ id: 'ps_seed_1', input, prompts: buildPrompts(input), createdAt: daysAgo(3) }];
+}
+
+// ─── Design Studio brand kits ────────────────────────────────────────────────
+
+function svgLogo(svg: string): string {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+/** Sample brand kits for some seed clients; others are left without a kit to show the manual path. */
+export function seedBrandKits(): BrandKit[] {
+  const at = daysAgo(10);
+  return [
+    {
+      id: 'bk_azure',
+      clientId: 'cl_azure',
+      name: 'Azure Shores',
+      logo: svgLogo(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 120"><g fill="none" stroke="#C79B5B" stroke-width="6" stroke-linecap="round"><path d="M14 70c18-18 36-18 54 0s36 18 54 0"/><path d="M14 92c18-18 36-18 54 0s36 18 54 0" opacity=".55"/></g><text x="146" y="78" font-family="Georgia, serif" font-size="46" letter-spacing="6" fill="#EFE8DC">AZURE SHORES</text></svg>',
+      ),
+      colors: { primary: '#0F2A3A', secondary: '#EFE8DC', accent: '#C79B5B' },
+      fonts: { heading: 'Cormorant Garamond', body: 'Manrope' },
+      toneOfVoice: 'Premium, warm, confident',
+      updatedAt: at,
+    },
+    {
+      id: 'bk_noor',
+      clientId: 'cl_noor',
+      name: 'Noor Oud',
+      logo: svgLogo(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120"><circle cx="52" cy="60" r="34" fill="none" stroke="#B88A3E" stroke-width="5"/><circle cx="52" cy="60" r="10" fill="#B88A3E"/><text x="112" y="76" font-family="Georgia, serif" font-size="50" letter-spacing="12" fill="#F3EBDD">NOOR</text></svg>',
+      ),
+      colors: { primary: '#1A1210', secondary: '#F3EBDD', accent: '#B88A3E' },
+      fonts: { heading: 'Bodoni Moda', body: 'DM Sans' },
+      toneOfVoice: 'Luxurious, heartfelt, restrained',
+      updatedAt: at,
+    },
+    {
+      id: 'bk_pulse',
+      clientId: 'cl_pulse',
+      name: 'Pulse',
+      logo: null,
+      colors: { primary: '#0B1B3F', secondary: '#F4F6FB', accent: '#3DE0A0' },
+      fonts: { heading: 'Syne', body: 'Inter' },
+      toneOfVoice: 'Bold, energetic, clear',
+      updatedAt: at,
+    },
+  ];
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Cpu, Database, Download, Palette, RefreshCw, RotateCw, Trash2, Upload, User } from 'lucide-react';
 import { STATUS_LABELS, useAIStatus, type ConnectionStatus } from '@/store/useAIStatus';
+import { useAssets } from '@/features/studio/assets/assetStore';
 import { useStore } from '@/store/AppStore';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -98,6 +99,7 @@ export default function SettingsPage() {
   const store = useStore();
   const { settings, updateSettings } = store;
   const toast = useToast();
+  const assets = useAssets();
   const fileRef = useRef<HTMLInputElement>(null);
   const [confirm, setConfirm] = useState<'reset' | 'clear' | null>(null);
   const location = useLocation();
@@ -270,10 +272,11 @@ export default function SettingsPage() {
       <ConfirmDialog
         open={confirm === 'clear'}
         title="Clear all data?"
-        message="This permanently deletes every project, client, brief, campaign and prompt from this browser. Export a backup first if you might need it."
+        message="This permanently deletes every project, client, brief, campaign, prompt, design and upload from this browser. Export a backup first if you might need it."
         confirmLabel="Clear everything"
         onConfirm={() => {
           store.clearData();
+          void assets.clearAll();
           toast('All data cleared', 'info');
         }}
         onClose={() => setConfirm(null)}

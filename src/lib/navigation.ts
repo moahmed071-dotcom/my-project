@@ -3,6 +3,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   Megaphone,
+  PenTool,
   Settings,
   Sparkles,
   Users,
@@ -24,5 +25,6 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/brief', label: 'Creative Brief', icon: FileText, group: 'Create', keywords: 'brief generator' },
   { to: '/campaign', label: 'Campaign Generator', icon: Megaphone, group: 'Create', keywords: 'campaign idea tagline' },
   { to: '/prompts', label: 'Prompt Generator', icon: Sparkles, group: 'Create', keywords: 'ai prompt image video midjourney' },
+  { to: '/studio', label: 'Design Studio', icon: PenTool, group: 'Create', keywords: 'design editor canvas social post template layout' },
   { to: '/settings', label: 'Settings', icon: Settings, group: 'System', keywords: 'preferences profile data' },
 ];

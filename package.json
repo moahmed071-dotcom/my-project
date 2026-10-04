@@ -12,7 +12,9 @@
     "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json",
     "start": "tsx server/index.ts --production",
     "preview": "npm run build && npm start",
-    "test:e2e": "npm run build && node tests/e2e.mjs"
+    "test:e2e": "npm run build && node tests/e2e.mjs && node tests/studio-e2e.mjs",
+    "test:unit": "node --import tsx --test tests/unit/*.test.ts",
+    "test": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

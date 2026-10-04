@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { KIND_ICONS } from '@/components/layout/GlobalSearch';
 import { pluralize } from '@/lib/format';
 
-const ORDER: SearchKind[] = ['Project', 'Client', 'Brief', 'Campaign', 'Prompt', 'Page'];
+const ORDER: SearchKind[] = ['Project', 'Client', 'Design', 'Brief', 'Campaign', 'Prompt', 'Page'];
 
 export default function SearchPage() {
   const store = useStore();

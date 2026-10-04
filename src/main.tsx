@@ -4,15 +4,18 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AppStoreProvider } from './store/AppStore';
 import { ToastProvider } from './components/ui/Toast';
+import { AssetProvider } from './features/studio/assets/assetStore';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AppStoreProvider>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
+        <AssetProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </AssetProvider>
       </AppStoreProvider>
     </BrowserRouter>
   </StrictMode>,

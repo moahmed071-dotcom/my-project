@@ -83,3 +83,27 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── Design Studio ─────────────────────────────────────────────────────── */
+@layer components {
+  .studio-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .studio-range {
+    @apply h-4 cursor-pointer appearance-none bg-transparent;
+  }
+  .studio-range::-webkit-slider-runnable-track {
+    @apply h-[3px] rounded-full bg-white/[0.12];
+  }
+  .studio-range::-webkit-slider-thumb {
+    @apply -mt-[5px] h-[13px] w-[13px] appearance-none rounded-full border-2 border-ink-950 bg-fog-100 shadow;
+  }
+  .studio-range::-moz-range-track {
+    @apply h-[3px] rounded-full bg-white/[0.12];
+  }
+  .studio-range::-moz-range-thumb {
+    @apply h-[11px] w-[11px] rounded-full border-2 border-ink-950 bg-fog-100;
+  }
+}
