@@ -10,8 +10,9 @@ export function AppLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, [location.pathname]);
+    // Pages with a #section link handle their own scrolling.
+    if (!location.hash) window.scrollTo({ top: 0 });
+  }, [location.pathname, location.hash]);
 
   return (
     <div className="flex min-h-full">

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
 
 export function Skeleton({ className }: { className?: string }) {
@@ -8,7 +9,17 @@ export function Skeleton({ className }: { className?: string }) {
   );
 }
 
-export function GeneratingSkeleton({ label = 'Generating…', blocks = 4 }: { label?: string; blocks?: number }) {
+function useElapsedSeconds() {
+  const [s, setS] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setS((x) => x + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return s;
+}
+
+export function GeneratingSkeleton({ label = 'Generating…', blocks = 4, hint }: { label?: string; blocks?: number; hint?: string }) {
+  const elapsed = useElapsedSeconds();
   return (
     <div className="surface animate-fade-in p-6 sm:p-8" aria-busy="true" aria-live="polite">
       <div className="mb-8 flex items-center gap-3">
@@ -17,7 +28,9 @@ export function GeneratingSkeleton({ label = 'Generating…', blocks = 4 }: { la
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
         </span>
         <span className="text-sm text-fog-300">{label}</span>
+        {elapsed > 0 && <span className="ml-auto font-mono text-[11px] tabular-nums text-fog-500">{elapsed}s</span>}
       </div>
+      {hint && <p className="-mt-5 mb-8 text-xs text-fog-500">{hint}</p>}
       <Skeleton className="mb-3 h-8 w-2/3" />
       <Skeleton className="mb-10 h-4 w-1/3" />
       <div className="space-y-8">

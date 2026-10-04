@@ -134,7 +134,7 @@ export default function Dashboard() {
       <section>
         <div className="mb-4 flex items-baseline justify-between">
           <h2 className="text-sm font-semibold text-fog-50">Quick tools</h2>
-          <p className="text-xs text-fog-500">Powered by the {settings.aiProvider === 'local' ? 'local creative engine' : 'remote AI endpoint'}</p>
+          <p className="text-xs text-fog-500">Powered by {settings.aiProvider === 'claude' ? 'Claude' : settings.aiProvider === 'local' ? 'the local creative engine' : 'the remote AI endpoint'}</p>
         </div>
         <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
           {QUICK_TOOLS.map(({ to, title, description, icon: Icon, tag }, i) => (

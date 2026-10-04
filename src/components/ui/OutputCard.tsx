@@ -24,7 +24,7 @@ export function OutputBlock({
         </h3>
         {actions}
       </div>
-      <div className="text-[15px] leading-relaxed text-fog-200">{children}</div>
+      <div dir="auto" className="whitespace-pre-line text-[15px] leading-relaxed text-fog-200">{children}</div>
     </section>
   );
 }
@@ -33,7 +33,7 @@ export function BulletList({ items }: { items: string[] }) {
   return (
     <ul className="space-y-2">
       {items.map((item, i) => (
-        <li key={i} className="flex gap-3">
+        <li key={i} dir="auto" className="flex gap-3">
           <span className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-accent" />
           <span>{item}</span>
         </li>

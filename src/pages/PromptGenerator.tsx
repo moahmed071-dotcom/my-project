@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Box, Building2, Camera, Check, Clapperboard, Film, ImageIcon, LayoutTemplate, RotateCcw, Sparkles, Wand2, type LucideIcon } from 'lucide-react';
 import { useStore } from '@/store/AppStore';
 import { useGeneration } from '@/store/useGeneration';
-import { PROMPT_TYPES, type GeneratedPrompt, type PromptFields, type PromptInput, type PromptSet, type PromptType } from '@/types';
+import { OUTPUT_LANGUAGES, OUTPUT_LANGUAGE_LABELS, PROMPT_TYPES, type GeneratedPrompt, type OutputLanguage, type PromptFields, type PromptInput, type PromptSet, type PromptType } from '@/types';
 import { PROMPT_TYPE_META, ASPECT_RATIOS, PROMPT_STYLES } from '@/services/ai/promptTypes';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -56,6 +56,7 @@ export default function PromptGenerator() {
     style: 'Auto',
     aspectRatio: settings.defaultAspectRatio,
     types: [...PROMPT_TYPES],
+    language: 'auto',
   });
   const [ideaError, setIdeaError] = useState<string>();
   const [tab, setTab] = useState<PromptType | null>(null);
@@ -113,7 +114,7 @@ export default function PromptGenerator() {
   }
 
   function resetForm() {
-    setForm({ idea: '', style: 'Auto', aspectRatio: settings.defaultAspectRatio, types: [...PROMPT_TYPES] });
+    setForm({ idea: '', style: 'Auto', aspectRatio: settings.defaultAspectRatio, types: [...PROMPT_TYPES], language: 'auto' });
     setIdeaError(undefined);
     gen.reset();
     setParams({}, { replace: true });
@@ -185,6 +186,15 @@ export default function PromptGenerator() {
               <Select label="Aspect ratio" value={form.aspectRatio} options={ASPECT_RATIOS} onChange={(e) => setForm((f) => ({ ...f, aspectRatio: e.target.value }))} />
             </div>
 
+            <Select
+              label="Field language"
+              wrapperClassName="mt-4"
+              value={form.language ?? 'auto'}
+              options={OUTPUT_LANGUAGES.map((l) => ({ value: l, label: OUTPUT_LANGUAGE_LABELS[l] }))}
+              onChange={(e) => setForm((f) => ({ ...f, language: e.target.value as OutputLanguage }))}
+              hint="The paste-ready prompt stays in English, which image and video models handle best."
+            />
+
             <fieldset className="mt-5">
               <legend className="mb-2 flex w-full items-center justify-between text-xs font-medium text-fog-200">
                 Prompt types
@@ -248,9 +258,9 @@ export default function PromptGenerator() {
 
         <div className="lg:col-span-7">
           {gen.status === 'loading' ? (
-            <GeneratingSkeleton label={`${gen.providerName} is crafting your prompts…`} blocks={4} />
+            <GeneratingSkeleton label={`${gen.providerName} is crafting your prompts…`} blocks={4} hint={gen.providerName === 'Claude' ? 'Claude is art-directing each prompt. This usually takes 30–90 seconds.' : undefined} />
           ) : gen.status === 'error' && gen.error ? (
-            <ErrorState message={gen.error.message} hint={gen.error.hint} onRetry={() => submit()} />
+            <ErrorState message={gen.error.message} hint={gen.error.hint} code={gen.error.code} onRetry={() => submit()} />
           ) : active ? (
             <PromptSetView set={active} tab={tab} onTab={setTab} />
           ) : (
@@ -323,7 +333,7 @@ function PromptSetView({ set, tab, onTab }: { set: PromptSet; tab: PromptType | 
             <Camera className="h-3.5 w-3.5 text-fog-500" />
             <p className="label">Compiled prompt</p>
           </div>
-          <pre className="whitespace-pre-wrap break-words rounded-xl border border-white/[0.06] bg-ink-950 p-4 font-mono text-[12.5px] leading-relaxed text-fog-200">
+          <pre dir="ltr" className="whitespace-pre-wrap break-words rounded-xl border border-white/[0.06] bg-ink-950 p-4 font-mono text-[12.5px] leading-relaxed text-fog-200">
             {current.compiled}
           </pre>
 
@@ -334,7 +344,7 @@ function PromptSetView({ set, tab, onTab }: { set: PromptSet; tab: PromptType | 
                 className={cn('bg-ink-900 p-4', (key === 'subject' || key === 'negativePrompt') && 'sm:col-span-2')}
               >
                 <dt className="label text-[10px]">{label}</dt>
-                <dd className={cn('mt-1.5 text-sm leading-relaxed', key === 'negativePrompt' ? 'text-red-200/70' : 'text-fog-200')}>
+                <dd dir="auto" className={cn('mt-1.5 whitespace-pre-line text-sm leading-relaxed', key === 'negativePrompt' ? 'text-red-200/70' : 'text-fog-200')}>
                   {current.fields[key]}
                 </dd>
               </div>

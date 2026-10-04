@@ -3,10 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { Download, FileText, RotateCcw, Wand2 } from 'lucide-react';
 import { useStore } from '@/store/AppStore';
 import { useGeneration } from '@/store/useGeneration';
-import type { Brief, BriefInput, BriefOutput } from '@/types';
+import { OUTPUT_LANGUAGES, OUTPUT_LANGUAGE_LABELS, type Brief, type BriefInput, type BriefOutput, type OutputLanguage } from '@/types';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
-import { Input, Textarea } from '@/components/ui/Field';
+import { Input, Select, Textarea } from '@/components/ui/Field';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { GeneratingSkeleton } from '@/components/ui/Skeleton';
@@ -30,6 +30,7 @@ const EMPTY: BriefInput = {
   keyMessage: '',
   deliverables: '',
   additionalNotes: '',
+  language: 'auto',
 };
 
 const EXAMPLE: BriefInput = {
@@ -44,6 +45,7 @@ const EXAMPLE: BriefInput = {
   keyMessage: 'Beachfront living, designed for generations',
   deliverables: 'Key visual, Bilingual brochure, 45s launch film, Social suite, Hoardings',
   additionalNotes: 'Developer logo lock-up and RERA number on all assets.',
+  language: 'en',
 };
 
 const PROJECT_TYPES = ['Brand identity', 'Real estate launch', 'Social media campaign', 'Advertising campaign', 'AI visual production', 'Video production', 'Packaging design', 'Website / digital'];
@@ -71,7 +73,7 @@ export default function BriefGenerator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.id]);
 
-  const set = (k: keyof BriefInput, v: string) => {
+  const set = (k: Exclude<keyof BriefInput, 'language'>, v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }));
   };
@@ -136,6 +138,13 @@ export default function BriefGenerator() {
               <Textarea label="Key message" wrapperClassName="sm:col-span-2" rows={2} placeholder="The one thing they must remember" value={form.keyMessage} onChange={(e) => set('keyMessage', e.target.value)} />
               <Textarea label="Deliverables" wrapperClassName="sm:col-span-2" rows={2} placeholder="Comma-separated: Key visual, Social suite, 30s film…" value={form.deliverables} onChange={(e) => set('deliverables', e.target.value)} />
               <Textarea label="Additional notes" wrapperClassName="sm:col-span-2" rows={2} placeholder="Mandatories, references, budget, timing…" value={form.additionalNotes} onChange={(e) => set('additionalNotes', e.target.value)} />
+              <Select
+                label="Output language"
+                wrapperClassName="sm:col-span-2"
+                value={form.language ?? 'auto'}
+                options={OUTPUT_LANGUAGES.map((l) => ({ value: l, label: OUTPUT_LANGUAGE_LABELS[l] }))}
+                onChange={(e) => setForm((f) => ({ ...f, language: e.target.value as OutputLanguage }))}
+              />
             </div>
             <datalist id="brief-clients">
               {clients.map((c) => (
@@ -175,9 +184,9 @@ export default function BriefGenerator() {
         <div className="lg:col-span-7">
           <div className="lg:sticky lg:top-24">
             {gen.status === 'loading' ? (
-              <GeneratingSkeleton label={`${gen.providerName} is writing your brief…`} blocks={5} />
+              <GeneratingSkeleton label={`${gen.providerName} is writing your brief…`} blocks={5} hint={gen.providerName === 'Claude' ? 'Claude is thinking through strategy and direction. This usually takes 30–90 seconds.' : undefined} />
             ) : gen.status === 'error' && gen.error ? (
-              <ErrorState message={gen.error.message} hint={gen.error.hint} onRetry={() => submit()} />
+              <ErrorState message={gen.error.message} hint={gen.error.hint} code={gen.error.code} onRetry={() => submit()} />
             ) : active ? (
               <BriefView brief={active} />
             ) : (
@@ -204,8 +213,8 @@ function BriefView({ brief }: { brief: Brief }) {
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <p className="label">Creative Brief · {formatDate(brief.createdAt)}</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-fog-50 sm:text-3xl">{input.projectName}</h2>
-            <p className="mt-1 font-display text-xl italic text-fog-300">{output.headline.split(' — ')[1] ?? output.headline}</p>
+            <h2 dir="auto" className="mt-3 text-2xl font-semibold tracking-tight text-fog-50 sm:text-3xl">{input.projectName}</h2>
+            <p dir="auto" className="mt-1 font-display text-xl italic text-fog-300">{output.headline.split(' — ')[1] ?? output.headline}</p>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-fog-500">
               <span>Client · <span className="text-fog-300">{input.client}</span></span>
               {input.market && <span>Market · <span className="text-fog-300">{input.market}</span></span>}

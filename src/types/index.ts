@@ -35,6 +35,18 @@ export interface Client {
   createdAt: string;
 }
 
+// ─── Output language ──────────────────────────────────────────────────────────
+
+export const OUTPUT_LANGUAGES = ['auto', 'en', 'ar', 'bilingual'] as const;
+export type OutputLanguage = (typeof OUTPUT_LANGUAGES)[number];
+
+export const OUTPUT_LANGUAGE_LABELS: Record<OutputLanguage, string> = {
+  auto: 'Match my input',
+  en: 'English',
+  ar: 'Arabic (العربية)',
+  bilingual: 'Bilingual (Arabic + English)',
+};
+
 // ─── Creative Brief ───────────────────────────────────────────────────────────
 
 export interface BriefInput {
@@ -49,6 +61,8 @@ export interface BriefInput {
   keyMessage: string;
   deliverables: string;
   additionalNotes: string;
+  /** Optional for briefs saved before Phase 2. */
+  language?: OutputLanguage;
 }
 
 export interface OutputSection {
@@ -83,6 +97,7 @@ export interface CampaignInput {
   occasion: string;
   tone: string;
   keyMessage: string;
+  language?: OutputLanguage;
 }
 
 export interface SocialIdea {
@@ -135,6 +150,7 @@ export interface PromptInput {
   style: string;
   aspectRatio: string;
   types: PromptType[];
+  language?: OutputLanguage;
 }
 
 export interface PromptFields {
@@ -167,7 +183,8 @@ export interface PromptSet {
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
-export type AIProviderId = 'local' | 'remote';
+/** claude = built-in server backend · local = offline demo engine · remote = custom endpoint */
+export type AIProviderId = 'claude' | 'local' | 'remote';
 
 export interface Settings {
   userName: string;
@@ -180,4 +197,6 @@ export interface Settings {
   remoteModel: string;
   simulateLatency: boolean;
   compactSidebar: boolean;
+  /** Bumped when the default engine changes so stored settings can be migrated. */
+  engineVersion: number;
 }

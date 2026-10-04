@@ -55,8 +55,13 @@ function loadState(): AppState {
     briefs: asArray<Brief>(loadJSON('briefs', [])),
     campaigns: asArray<Campaign>(loadJSON('campaigns', [])),
     promptSets: asArray<PromptSet>(loadJSON('promptSets', [])),
-    settings: { ...DEFAULT_SETTINGS, ...loadJSON<Partial<Settings>>('settings', {}) },
+    settings: migrateSettings(loadJSON<Partial<Settings>>('settings', {})),
   };
+}
+
+/** Fill in settings added since the workspace was saved. The user's engine choice is kept as-is. */
+function migrateSettings(stored: Partial<Settings>): Settings {
+  return { ...DEFAULT_SETTINGS, ...stored, engineVersion: DEFAULT_SETTINGS.engineVersion };
 }
 
 function reducer(state: AppState, action: Action): AppState {
@@ -203,7 +208,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             briefs: Array.isArray(data.briefs) ? data.briefs : [],
             campaigns: Array.isArray(data.campaigns) ? data.campaigns : [],
             promptSets: Array.isArray(data.promptSets) ? data.promptSets : [],
-            settings: { ...DEFAULT_SETTINGS, ...(data.settings ?? {}) },
+            settings: migrateSettings(data.settings ?? {}),
           },
         });
       },

@@ -16,6 +16,7 @@ export const DEFAULT_SETTINGS: Settings = {
   remoteModel: 'claude-sonnet-5-5',
   simulateLatency: true,
   compactSidebar: false,
+  engineVersion: 2,
 };
 
 export function seedClients(): Client[] {

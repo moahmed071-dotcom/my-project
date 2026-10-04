@@ -45,6 +45,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
         <input
           ref={ref}
           id={id}
+          dir="auto"
           required={required}
           aria-invalid={!!error}
           className={cn('field', error && 'border-red-500/50', className)}
@@ -65,6 +66,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
         <textarea
           ref={ref}
           id={id}
+          dir="auto"
           rows={rows}
           required={required}
           aria-invalid={!!error}
