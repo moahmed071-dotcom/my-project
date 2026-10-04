@@ -55,8 +55,17 @@ function loadState(): AppState {
     briefs: asArray<Brief>(loadJSON('briefs', [])),
     campaigns: asArray<Campaign>(loadJSON('campaigns', [])),
     promptSets: asArray<PromptSet>(loadJSON('promptSets', [])),
-    settings: { ...DEFAULT_SETTINGS, ...loadJSON<Partial<Settings>>('settings', {}) },
+    settings: migrateSettings(loadJSON<Partial<Settings>>('settings', {})),
   };
+}
+
+/** Phase 2 made Claude the default engine; move workspaces still on the old default over once. */
+function migrateSettings(stored: Partial<Settings>): Settings {
+  const merged = { ...DEFAULT_SETTINGS, ...stored };
+  if ((stored.engineVersion ?? 1) < 2) {
+    return { ...merged, aiProvider: stored.aiProvider === 'remote' ? 'remote' : 'claude', engineVersion: 2 };
+  }
+  return merged;
 }
 
 function reducer(state: AppState, action: Action): AppState {
@@ -203,7 +212,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             briefs: Array.isArray(data.briefs) ? data.briefs : [],
             campaigns: Array.isArray(data.campaigns) ? data.campaigns : [],
             promptSets: Array.isArray(data.promptSets) ? data.promptSets : [],
-            settings: { ...DEFAULT_SETTINGS, ...(data.settings ?? {}) },
+            settings: migrateSettings(data.settings ?? {}),
           },
         });
       },

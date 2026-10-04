@@ -24,6 +24,8 @@ export class GenerationError extends Error {
   constructor(
     message: string,
     public readonly hint?: string,
+    /** Machine-readable reason, e.g. "not_configured" from the Claude backend. */
+    public readonly code?: string,
   ) {
     super(message);
     this.name = 'GenerationError';

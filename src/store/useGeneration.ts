@@ -7,6 +7,7 @@ export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
 export interface GenerationErrorState {
   message: string;
   hint?: string;
+  code?: string;
 }
 
 /**
@@ -38,7 +39,7 @@ export function useGeneration<T>() {
         if ((err as Error).name === 'AbortError') return null;
         const e =
           err instanceof GenerationError
-            ? { message: err.message, hint: err.hint }
+            ? { message: err.message, hint: err.hint, code: err.code }
             : { message: 'Something went wrong while generating.', hint: 'Please try again in a moment.' };
         setError(e);
         setStatus('error');

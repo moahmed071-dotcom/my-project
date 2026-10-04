@@ -3,3 +3,11 @@ dist
 *.local
 .DS_Store
 *.tsbuildinfo
+
+# Secrets — never commit real keys
+.env
+.env.*
+!.env.example
+
+# Test artifacts
+tests/output

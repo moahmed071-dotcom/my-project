@@ -3,10 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { Clapperboard, Download, Megaphone, MousePointerClick, RotateCcw, Wand2 } from 'lucide-react';
 import { useStore } from '@/store/AppStore';
 import { useGeneration } from '@/store/useGeneration';
-import type { Campaign, CampaignInput, CampaignOutput } from '@/types';
+import { OUTPUT_LANGUAGES, OUTPUT_LANGUAGE_LABELS, type Campaign, type CampaignInput, type CampaignOutput, type OutputLanguage } from '@/types';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
-import { Input, Textarea } from '@/components/ui/Field';
+import { Input, Select, Textarea } from '@/components/ui/Field';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { GeneratingSkeleton } from '@/components/ui/Skeleton';
@@ -27,6 +27,7 @@ const EMPTY: CampaignInput = {
   occasion: '',
   tone: '',
   keyMessage: '',
+  language: 'auto',
 };
 
 const EXAMPLE: CampaignInput = {
@@ -38,6 +39,7 @@ const EXAMPLE: CampaignInput = {
   occasion: 'Grand opening',
   tone: 'Warm, bold, inviting',
   keyMessage: 'Seasonal food made to be shared',
+  language: 'en',
 };
 
 const OCCASIONS = ['Launch', 'Ramadan', 'Eid', 'National Day', 'Summer', 'White Friday', 'New Year', 'Always-on'];
@@ -62,7 +64,7 @@ export default function CampaignGenerator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.id]);
 
-  const set = (k: keyof CampaignInput, v: string) => {
+  const set = (k: Exclude<keyof CampaignInput, 'language'>, v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }));
   };
@@ -121,6 +123,13 @@ export default function CampaignGenerator() {
               <Input label="Campaign occasion" list="cp-occasions" placeholder="e.g. Ramadan, Launch" value={form.occasion} onChange={(e) => set('occasion', e.target.value)} />
               <Input label="Tone" wrapperClassName="sm:col-span-2" placeholder="e.g. Luxury, warm, cinematic" value={form.tone} onChange={(e) => set('tone', e.target.value)} />
               <Textarea label="Key message" wrapperClassName="sm:col-span-2" rows={2} placeholder="The one idea the campaign must land" value={form.keyMessage} onChange={(e) => set('keyMessage', e.target.value)} />
+              <Select
+                label="Output language"
+                wrapperClassName="sm:col-span-2"
+                value={form.language ?? 'auto'}
+                options={OUTPUT_LANGUAGES.map((l) => ({ value: l, label: OUTPUT_LANGUAGE_LABELS[l] }))}
+                onChange={(e) => setForm((f) => ({ ...f, language: e.target.value as OutputLanguage }))}
+              />
             </div>
             <datalist id="cp-brands">
               {clients.map((c) => (
@@ -157,9 +166,9 @@ export default function CampaignGenerator() {
 
         <div className="lg:col-span-7">
           {gen.status === 'loading' ? (
-            <GeneratingSkeleton label={`${gen.providerName} is developing the campaign…`} blocks={6} />
+            <GeneratingSkeleton label={`${gen.providerName} is developing the campaign…`} blocks={6} hint={gen.providerName === 'Claude' ? 'Claude is developing the idea and every touchpoint. This usually takes 30–90 seconds.' : undefined} />
           ) : gen.status === 'error' && gen.error ? (
-            <ErrorState message={gen.error.message} hint={gen.error.hint} onRetry={() => submit()} />
+            <ErrorState message={gen.error.message} hint={gen.error.hint} code={gen.error.code} onRetry={() => submit()} />
           ) : active ? (
             <CampaignView campaign={active} />
           ) : (
@@ -204,8 +213,8 @@ function CampaignView({ campaign }: { campaign: Campaign }) {
             </div>
           </div>
           <p className="label mt-8 text-accent">The big idea</p>
-          <h2 className="mt-3 text-balance font-display text-4xl italic leading-[1.05] text-fog-50 sm:text-6xl">“{o.bigIdea}”</h2>
-          <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-fog-300">{o.bigIdeaRationale}</p>
+          <h2 dir="auto" className="mt-3 text-balance font-display text-4xl italic leading-[1.05] text-fog-50 sm:text-6xl">“{o.bigIdea}”</h2>
+          <p dir="auto" className="mt-5 max-w-2xl whitespace-pre-line text-[15px] leading-relaxed text-fog-300">{o.bigIdeaRationale}</p>
           <p className="mt-4 text-xs text-fog-500">Generated {formatDate(campaign.createdAt)}</p>
         </div>
       </header>

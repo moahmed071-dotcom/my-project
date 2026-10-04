@@ -80,6 +80,15 @@ export function buildBrief(input: BriefInput): BriefOutput {
         ],
       },
       {
+        id: 'concept',
+        title: 'Creative Concept',
+        body: `“${idea.name}.” ${idea.thought}`,
+        items: [
+          `Insight: ${insight}`,
+          `Why it’s ownable: it turns “${lowerFirst(keyMessage)}” into a feeling ${client} can claim before competitors do.`,
+        ],
+      },
+      {
         id: 'direction',
         title: 'Creative Direction',
         body: `Working idea: “${idea.name}.” ${idea.thought} The work should feel less like advertising and more like an invitation — rooted in a real human truth and executed with craft.`,

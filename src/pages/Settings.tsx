@@ -1,5 +1,7 @@
-import { useRef, useState, type ReactNode } from 'react';
-import { Cpu, Database, Download, Palette, RefreshCw, Trash2, Upload, User } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Cpu, Database, Download, Palette, RefreshCw, RotateCw, Trash2, Upload, User } from 'lucide-react';
+import { STATUS_LABELS, useAIStatus, type ConnectionStatus } from '@/store/useAIStatus';
 import { useStore } from '@/store/AppStore';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -12,9 +14,9 @@ import { pluralize } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import type { AIProviderId } from '@/types';
 
-function Section({ icon: Icon, title, description, children }: { icon: typeof User; title: string; description: string; children: ReactNode }) {
+function Section({ id, icon: Icon, title, description, children }: { id?: string; icon: typeof User; title: string; description: string; children: ReactNode }) {
   return (
-    <section className="surface grid animate-fade-up gap-6 p-6 md:grid-cols-3 md:gap-10 sm:p-8">
+    <section id={id} className="surface grid scroll-mt-24 animate-fade-up gap-6 p-6 md:grid-cols-3 md:gap-10 sm:p-8">
       <div>
         <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-ink-800">
           <Icon className="h-4 w-4 text-accent" />
@@ -28,9 +30,69 @@ function Section({ icon: Icon, title, description, children }: { icon: typeof Us
 }
 
 const PROVIDERS: { id: AIProviderId; title: string; description: string; badge: string }[] = [
-  { id: 'local', title: 'Local Creative Engine', description: 'Runs entirely in your browser. No API key, no data leaves your device.', badge: 'Active by default' },
-  { id: 'remote', title: 'Remote AI Endpoint', description: 'Send requests to your own backend that calls an LLM (e.g. Claude). Keys stay on the server.', badge: 'Advanced' },
+  { id: 'claude', title: 'Claude (Anthropic)', description: 'Real AI generation through this app’s server. The API key stays on the server.', badge: 'Recommended' },
+  { id: 'local', title: 'Local Creative Engine', description: 'Offline demo: template-based output generated in your browser. No API key needed.', badge: 'Fallback' },
+  { id: 'remote', title: 'Remote AI Endpoint', description: 'Send requests to another backend you run yourself.', badge: 'Advanced' },
 ];
+
+const STATUS_TONE: Record<ConnectionStatus, string> = {
+  connected: 'bg-accent shadow-[0_0_8px_rgba(198,244,50,0.8)]',
+  not_configured: 'bg-amber-300',
+  invalid_key: 'bg-red-400',
+  model_not_found: 'bg-red-400',
+  unreachable: 'bg-amber-300',
+  error: 'bg-red-400',
+  server_offline: 'bg-red-400',
+};
+
+const STATUS_HELP: Partial<Record<ConnectionStatus, string>> = {
+  not_configured: 'Add ANTHROPIC_API_KEY to the .env file in the project root and restart the server. See README → AI setup.',
+  invalid_key: 'Anthropic rejected the key. Check ANTHROPIC_API_KEY in .env and restart the server.',
+  model_not_found: 'The configured model wasn’t found. Check ANTHROPIC_MODEL in .env.',
+  unreachable: 'The server couldn’t reach the Anthropic API. Check its internet connection.',
+  error: 'The connection check failed. Try again, or check the server logs.',
+  server_offline: 'The Creative OS server isn’t responding. Start it with npm run dev (or npm start in production).',
+};
+
+function AIStatusCard() {
+  const { status, checking, refresh } = useAIStatus();
+  const s = status?.status;
+  const rows: [string, ReactNode][] = [
+    ['Provider', 'Anthropic'],
+    ['Model', status?.model ? <span className="font-mono text-[13px]">{status.model}</span> : <span className="text-fog-500">Configured on server</span>],
+    [
+      'Connection',
+      checking && !status ? (
+        <span className="text-fog-500">Checking…</span>
+      ) : s ? (
+        <span className="inline-flex items-center gap-2">
+          <span className={cn('h-2 w-2 rounded-full', STATUS_TONE[s])} />
+          {STATUS_LABELS[s]}
+        </span>
+      ) : null,
+    ],
+  ];
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-ink-850/50 p-4">
+      <dl className="grid gap-3 sm:grid-cols-3">
+        {rows.map(([label, value]) => (
+          <div key={label} className="min-w-0">
+            <dt className="label text-[10px]">{label}</dt>
+            <dd className="mt-1 truncate text-sm text-fog-100">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.05] pt-3">
+        <p className="text-xs leading-relaxed text-fog-500">
+          {s && STATUS_HELP[s] ? STATUS_HELP[s] : 'The API key is stored only on the server and is never shown here.'}
+        </p>
+        <Button size="sm" variant="outline" loading={checking} icon={<RotateCw className="h-3.5 w-3.5" />} onClick={refresh}>
+          Check again
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const store = useStore();
@@ -38,6 +100,12 @@ export default function SettingsPage() {
   const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [confirm, setConfirm] = useState<'reset' | 'clear' | null>(null);
+  const location = useLocation();
+
+  // Support deep links such as /settings#ai-engine from error states.
+  useEffect(() => {
+    if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [location.hash]);
 
   async function onImport(file: File) {
     try {
@@ -76,8 +144,9 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        <Section icon={Cpu} title="AI engine" description="Choose what powers the generators. The architecture is provider-agnostic, so a live model can be connected later.">
-          <div className="grid gap-3 sm:grid-cols-2">
+        <Section id="ai-engine" icon={Cpu} title="AI engine" description="Claude powers the Creative Brief, Campaign and Prompt generators through this app’s own server.">
+          <AIStatusCard />
+          <div className="grid gap-3 sm:grid-cols-3">
             {PROVIDERS.map((p) => (
               <button
                 key={p.id}
@@ -117,14 +186,16 @@ export default function SettingsPage() {
             </div>
           )}
 
-          <div className="border-t border-white/[0.05] pt-4">
-            <Toggle
-              checked={settings.simulateLatency}
-              onChange={(v) => updateSettings({ simulateLatency: v })}
-              label="Simulate generation time"
-              description="Adds a short realistic delay to the local engine so loading states feel natural."
-            />
-          </div>
+          {settings.aiProvider === 'local' && (
+            <div className="border-t border-white/[0.05] pt-4">
+              <Toggle
+                checked={settings.simulateLatency}
+                onChange={(v) => updateSettings({ simulateLatency: v })}
+                label="Simulate generation time"
+                description="Adds a short realistic delay to the local engine so loading states feel natural."
+              />
+            </div>
+          )}
         </Section>
 
         <Section icon={Database} title="Data" description="Everything is stored locally in this browser. Export regularly to keep a backup.">
